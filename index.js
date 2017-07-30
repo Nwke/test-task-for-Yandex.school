@@ -4,9 +4,10 @@
 
 
 const myForm = {
-	submit: (e,objValidateResult) => {
+	submit: (objValidateResult) => {
 		// переменная objValidateResult - Объект,который является результатом вызова метода  валидации у формы (  myForm.validate ) : validate() => { isValid: Boolean, errorFields: String[] }
-		function submitMethodForm(e,objValidateResult) {
+
+		function submitMethodForm(objValidateResult) {
 			// Определяем переменные в коде
 			let validObj = objValidateResult;
 			let inputFio = document.getElementsByName('fio')[0];
@@ -38,7 +39,7 @@ const myForm = {
 			function requestResponseFunctionProgress() {
 				resultContainer.classList.remove('success','error','progress');
 				resultContainer.classList.add('progress');
-				setTimeout(callQuery1(), requestResponse.timeout)
+				setTimeout(callQuery(), requestResponse.timeout)
 			}
 
 
@@ -74,8 +75,7 @@ const myForm = {
 				}
 			}
 
-
-			// Блок проверки на отправку запроса.Если все валидации успешны,то отправляем запрос и делаем кнопку отправки запроса неактивной
+			// Блок проверки на отправку запроса.Если все валидации были успешны,то отправляем запрос и делаем кнопку отправки запроса неактивной
 			// Если валидация неуспешна,то выставляем класс 'error' тем инпутам,которые не прошли валидацию
 
 			if ( !validObj.isValid ) {
@@ -93,12 +93,12 @@ const myForm = {
 		}
 
 		// Всё,что было выше - определение функции submitMethodForm,на строчке ниже мы ее вызываем.
-		submitMethodForm(e,objValidateResult);
+		submitMethodForm(objValidateResult);
 	},
 
 
-	validate: (e) => {
-		function validateInputs(e) {
+	validate:
+		function validateInputs() {
 			let inputFio = document.getElementsByName('fio')[0];
 			let inputEmail = document.getElementsByName('email')[0];
 			let inputPhone = document.getElementsByName('phone')[0];
@@ -165,12 +165,11 @@ const myForm = {
 			let validObj = {'isValid': flagValid, 'errorFields': errorFields};
 
 			return validObj;
-		}
-		 return validateInputs(e);
-	},
+		},
 
 
-	getData: (e) => {
+
+	getData:
 		function getObj() {
 			function getValue(name) {
 				return document.querySelector(`input[name="${name}"`).value;
@@ -180,13 +179,11 @@ const myForm = {
 				'email': getValue('email'),
 				'phone': getValue('phone'),
 			};
-			return dataObj
-		}
-		return getObj();
-	},
+			return dataObj;
+		},
 
 	
-	setData: (data) => {
+	setData:
 		function setValue(data) {
 			let fioValue   = data['fio'];
 			let emailValue = data['email'];
@@ -199,8 +196,6 @@ const myForm = {
 			setValue('email',emailValue);
 			setValue('phone',phoneValue);
 		}
-		setValue(data)
-	}
 };
 
 //Блок кода,отвечающий за взаимоедйствие с глобальным объектом myForm
@@ -212,17 +207,9 @@ submitButton.addEventListener('click', submitMethodForm);
 
 function submitMethodForm(e) {
 	e.preventDefault();
-	let objValidateResult = myForm.validate(e);
-	myForm.submit(e,objValidateResult);
+	let objValidateResult = myForm.validate();
+	myForm.submit(objValidateResult);
 }
-
-
-
-
-
-
-
-
 
 
 
