@@ -95,6 +95,8 @@ const myForm = {
 		// Всё,что было выше - определение функции submitMethodForm,на строчке ниже мы ее вызываем.
 		submitMethodForm(e,objValidateResult);
 	},
+
+
 	validate: (e) => {
 		function validateInputs(e) {
 			let inputFio = document.getElementsByName('fio')[0];
@@ -104,6 +106,7 @@ const myForm = {
 			let nameFieldEmail = inputEmail.getAttribute('name');
 			let nameFieldPhone = inputPhone.getAttribute('name');
 			// Определяем функции для валидации каждого инпута
+
 
 			// Фукнция проверки первого инпута ( ФИО )
 			function checkValidFio() {
@@ -149,6 +152,7 @@ const myForm = {
 				return phoneValidate;
 			}
 
+
 			// формируем объект,который должен вернуться в результате вызова метода validate
 			let flagValid = true;
 			let errorFields = [];
@@ -164,6 +168,8 @@ const myForm = {
 		}
 		 return validateInputs(e);
 	},
+
+
 	getData: (e) => {
 		function getObj() {
 			function getValue(name) {
@@ -179,6 +185,7 @@ const myForm = {
 		return getObj();
 	},
 
+	
 	setData: (data) => {
 		function setValue(data) {
 			let fioValue   = data['fio'];
