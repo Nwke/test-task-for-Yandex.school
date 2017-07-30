@@ -9,7 +9,6 @@ const myForm = {
 		function submitMethodForm(e,objValidateResult) {
 			// Определяем переменные в коде
 			let validObj = objValidateResult;
-			console.log(validObj);
 			let inputFio = document.getElementsByName('fio')[0];
 			let inputEmail = document.getElementsByName('email')[0];
 			let inputPhone = document.getElementsByName('phone')[0];
@@ -64,7 +63,6 @@ const myForm = {
 			}
 
 
-
 			function callQuery() {
 				let xhr = new XMLHttpRequest();
 				let xhrAdress = document.querySelector('#myForm').getAttribute('action');
@@ -76,21 +74,10 @@ const myForm = {
 				}
 			}
 
-			// Блок имитации ответа от сервера,чтобы не поднимать сам сервер.Start
-
-			let tmpArr = ['{"status":"progress","timeout":5000}','{"status":"error","reason":321}','{"status":"success"}'];
-
-
-			function callQuery1() {
-				setTimeout(() => onLoad({status: 200, responseText:`${tmpArr[(Math.random() * 3 | 0)]}`}), 500)
-			}
-
-			// Блок имитации ответа от сервера.End
-
-
 
 			// Блок проверки на отправку запроса.Если все валидации успешны,то отправляем запрос и делаем кнопку отправки запроса неактивной
 			// Если валидация неуспешна,то выставляем класс 'error' тем инпутам,которые не прошли валидацию
+
 			if ( !validObj.isValid ) {
 				for ( let count = 0; count < validObj.errorFields.length; count++ ) {
 					let errorName =  'input' + validObj.errorFields[count];
@@ -101,9 +88,10 @@ const myForm = {
 			}
 			else if ( validObj.isValid ) {
 				buttonSubmit.setAttribute('disabled','=disabled');
-				callQuery1();
+				callQuery();
 			}
 		}
+
 		// Всё,что было выше - определение функции submitMethodForm,на строчке ниже мы ее вызываем.
 		submitMethodForm(e,objValidateResult);
 	},
@@ -124,7 +112,6 @@ const myForm = {
 				if (value.split(' ').length === 3) {
 					fioValidate = true;
 				}
-				console.log('fioValidate = ', fioValidate);
 				return fioValidate
 			}
 
@@ -140,7 +127,6 @@ const myForm = {
 						emailValidate = true;
 					}
 				}
-				console.log('emailValidate = ', emailValidate);
 				return emailValidate;
 			}
 
@@ -160,7 +146,6 @@ const myForm = {
 						phoneValidate = true
 					}
 				}
-				console.log('phoneValidate = ', phoneValidate);
 				return phoneValidate;
 			}
 
@@ -173,9 +158,8 @@ const myForm = {
 				if ( !checkValidMail() )  errorFields.push(nameFieldEmail);
 				if ( !checkValidPhone() ) errorFields.push(nameFieldPhone);
 			}
-
 			let validObj = {'isValid': flagValid, 'errorFields': errorFields};
-			console.log(validObj);
+
 			return validObj;
 		}
 		 return validateInputs(e);
@@ -190,7 +174,6 @@ const myForm = {
 				'email': getValue('email'),
 				'phone': getValue('phone'),
 			};
-			console.log(dataObj);
 			return dataObj
 		}
 		return getObj();
@@ -225,31 +208,6 @@ function submitMethodForm(e) {
 	let objValidateResult = myForm.validate(e);
 	myForm.submit(e,objValidateResult);
 }
-
-
-// Блок 2 - блок метода validate
-let testButtonValidateMethod = document.querySelector('#testButtonValidateMethod');
-testButtonValidateMethod.addEventListener('click', testValidateMethod);
-
-function testValidateMethod(e) {
-	e.preventDefault();
-	myForm.validate();
-}
-
-
-/////////////////////////////////////////////////// TEST START ///////////////////////////////////////////////
-
-
-
-/////////////////////////////////////////////////// TEST END///////////////////////////////////////////////
-
-
-
-
-
-
-
-/////////////////////////////////////////////// LAB //////////////////////////////
 
 
 
