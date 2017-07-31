@@ -4,18 +4,15 @@
 
 
 const myForm = {
-	submit: (objValidateResult) => {
-		// переменная objValidateResult - Объект,который является результатом вызова метода  валидации у формы (  myForm.validate ) : validate() => { isValid: Boolean, errorFields: String[] }
-
-		function submitMethodForm(objValidateResult) {
+	submit: () => {
+		function submitMethodForm() {
 			// Определяем переменные в коде
-			let validObj = objValidateResult;
+			let validObj = myForm.validate();
 			let inputFio = document.getElementsByName('fio')[0];
 			let inputEmail = document.getElementsByName('email')[0];
 			let inputPhone = document.getElementsByName('phone')[0];
 			let resultContainer = document.querySelector('#resultContainer');
 			let buttonSubmit = document.querySelector('#submitButton');
-			let requestResponse;
 
 
 			// Удаляем у инпутов класс 'error',если такие есть (чистим 'старые' ошибки валидации)
@@ -30,16 +27,16 @@ const myForm = {
 				resultContainer.innerText = 'Success';
 			}
 
-			function requestResponseFunctionError() {
+			function requestResponseFunctionError(reason) {
 				resultContainer.classList.remove('success','error','progress');
 				resultContainer.classList.add('error');
-				resultContainer.innerText = requestResponse.reason;
+				resultContainer.innerText = reason;
 			}
 
-			function requestResponseFunctionProgress() {
+			function requestResponseFunctionProgress(timeout) {
 				resultContainer.classList.remove('success','error','progress');
 				resultContainer.classList.add('progress');
-				setTimeout(callQuery(), requestResponse.timeout)
+				setTimeout(callQuery, timeout)
 			}
 
 
@@ -54,10 +51,10 @@ const myForm = {
 							requestResponseFunctionSuccess();
 							break;
 						case "error":
-							requestResponseFunctionError();
+							requestResponseFunctionError(requestResponse.reason);
 							break;
 						case "progress":
-							requestResponseFunctionProgress();
+							requestResponseFunctionProgress(requestResponse.timeout);
 							break;
 					}
 				}
@@ -93,7 +90,7 @@ const myForm = {
 		}
 
 		// Всё,что было выше - определение функции submitMethodForm,на строчке ниже мы ее вызываем.
-		submitMethodForm(objValidateResult);
+		submitMethodForm();
 	},
 
 
@@ -110,12 +107,7 @@ const myForm = {
 
 			// Фукнция проверки первого инпута ( ФИО )
 			function checkValidFio() {
-				let fioValidate = false;
-				let value = inputFio.value;
-				if (value.split(' ').length === 3) {
-					fioValidate = true;
-				}
-				return fioValidate
+				return inputFio.value.split(' ').length === 3
 			}
 
 
@@ -207,8 +199,7 @@ submitButton.addEventListener('click', submitMethodForm);
 
 function submitMethodForm(e) {
 	e.preventDefault();
-	let objValidateResult = myForm.validate();
-	myForm.submit(objValidateResult);
+	myForm.submit();
 }
 
 
