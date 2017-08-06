@@ -10,25 +10,26 @@ const myForm = {
 		let inputFio = document.querySelector('input[name="fio"');
 		let inputEmail = document.querySelector('input[name="email"');
 		let inputPhone = document.querySelector('input[name="phone"');
-		let resultContainer = document.querySelector('#resultContainer');
+		let containerInfoOutput = document.querySelector('#resultContainer');
 		let buttonSubmit = document.querySelector('#submitButton');
 
 
-		// Удаляем у инпутов класс 'error',если такие есть (чистим 'старые' ошибки валидации)
-		let allError = document.querySelectorAll('.error');
-		allError.forEach((element) => element.classList.remove('error') );
+		// Удаляем у всех инпутов класс 'error' (чистим 'старые' ошибки валидации)
+		let allInputsError = document.querySelectorAll('.error');
+		for ( inputError of allInputsError) inputError.classList.remove('error');
 
 
-		// Блок формирование самого ajax-запроса
-		function callQuery() {
+		// Формируем ajax-запрос
+		function sendQuery() {
 			let xhr = new XMLHttpRequest();
 			let xhrAdress = document.querySelector('#myForm').getAttribute('action');
 			xhr.open('GET', xhrAdress);
 			xhr.send();
-			xhr.addEventListener('load', onLoad.bind(null, xhr));
+			xhr.addEventListener('load', processResponse.bind(null, xhr));
 		}
 
-		function onLoad(xhr) {
+		// Для каждого ответа с сервера вызываем свой callback
+		function processResponse(xhr) {
 			if ( xhr.status === 200 ) {
 				requestResponse = JSON.parse(xhr.responseText);
 
@@ -46,59 +47,30 @@ const myForm = {
 			}
 		}
 
-		// Определяем функции,которые будут выполняться в зависимости от того,Какой придет ответ на ajax-запрос
+		// Определяем функции,которые будут вызываться в зависимости от того, какой придет ответ на ajax-запрос
 		function requestResponseFunctionSuccess() {
-			resultContainer.classList.remove('success','error','progress');
-			resultContainer.classList.add('success');
-			resultContainer.innerText = 'Success';
+			containerInfoOutput.classList.remove('success','error','progress');
+			containerInfoOutput.classList.add('success');
+			containerInfoOutput.innerText = 'Success';
 		}
 
 		function requestResponseFunctionError(reason) {
-			resultContainer.classList.remove('success','error','progress');
-			resultContainer.classList.add('error');
-			resultContainer.innerText = reason;
+			containerInfoOutput.classList.remove('success','error','progress');
+			containerInfoOutput.classList.add('error');
+			containerInfoOutput.innerText = reason;
 		}
 
 		function requestResponseFunctionProgress(timeout) {
-			resultContainer.classList.remove('success','error','progress');
-			resultContainer.classList.add('progress');
-			setTimeout(callQuery, timeout)
+			containerInfoOutput.classList.remove('success','error','progress');
+			containerInfoOutput.classList.add('progress');
+			setTimeout(sendQuery, timeout)
 		}
 
 
-		// function callQuery() {
-		// 	let requestAdress = document.querySelector('#myForm').getAttribute('action');
-		// 	let querySettings = {
-		// 		method: 'GET',
-		// 		credentials: 'include'
-		// 	};
-		// 	fetch(requestAdress, querySettings).then( function (response) {
-		// 		return response.json();
-		// 	}).then(requestComplete);
-		// }
-		//
-		//
-		// // Блок формирование самого ajax-запроса
-		// function requestComplete(response) {
-		// 	if ( response.status === 200 ) {
-		// 		requestResponse = response.responseText;
-		//
-		// 		switch (requestResponse.status) {
-		// 			case "success":
-		// 				requestResponseFunctionSuccess();
-		// 				break;
-		// 			case "error":
-		// 				requestResponseFunctionError(requestResponse.reason);
-		// 				break;
-		// 			case "progress":
-		// 				requestResponseFunctionProgress(requestResponse.timeout);
-		// 				break;
-		// 		}
-		// 	}
-		// }
 
-		// Блок проверки на отправку запроса.Если все валидации были успешны,то отправляем запрос и делаем кнопку отправки запроса неактивной
-		// Если валидация неуспешна,то выставляем класс 'error' тем инпутам,которые не прошли валидацию
+
+		// Если все валидации были успешны, то отправляем запрос и делаем кнопку отправки запроса неактивной
+		// Если валидация неуспешна, то выставляем класс 'error' тем инпутам,которые не прошли валидацию
 
 		if ( !resultValidObj.isValid ) {
 			for ( let count = 0, len = resultValidObj.errorFields.length; count < len; count++ ) {
@@ -110,13 +82,11 @@ const myForm = {
 		}
 		else if ( resultValidObj.isValid ) {
 			buttonSubmit.setAttribute('disabled','disabled');
-			callQuery();
+			sendQuery();
 		}
 	},
 
-
 	validate:  () => {
-
 		let inputFio = document.querySelector('input[name="fio"');
 		let inputEmail = document.querySelector('input[name="email"');
 		let inputPhone = document.querySelector('input[name="phone"');
@@ -124,29 +94,27 @@ const myForm = {
 		let nameFieldEmail = inputEmail.getAttribute('name');
 		let nameFieldPhone = inputPhone.getAttribute('name');
 
-
 		// Определяем функции для валидации каждого инпута
-		// Фукнция проверки первого инпута ( ФИО )
+
+		// Фукнция валидации первого инпута ( ФИО )
 		function checkValidFio() {
 			return inputFio.value.split(' ').length === 3
 		}
 
-		// Функция для проверки второго инпута ( EMAIL )
+		// Функция валидации второго инпута ( EMAIL )
 		function checkValidMail() {
 			let emailValidate = false;
 			let validDomain = ['ya.ru','yandex.ru','yandex.ua','yandex.by','yandex.kz','yandex.com'];
 			let value = inputEmail.value;
 			let domain = value.split('@')[1];
 			if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(value)) {
-				if ( validDomain.indexOf(domain) !== -1	 ) {
-					emailValidate = true;
-				}
+				if ( validDomain.indexOf(domain) !== -1	 ) emailValidate = true;
 			}
 			return emailValidate;
 		}
 
 
-		// Функция для проверки третьего инпута ( PHONE )
+		// Функция валидации третьего инпута ( PHONE )
 		function checkValidPhone() {
 			let phoneValidate = false;
 			let value = inputPhone.value;
@@ -173,7 +141,6 @@ const myForm = {
 		}
 		let resultValidObj = {'isValid': flagGeneralValid, 'errorFields': errorFields};
 
-		console.log('1');
 		return resultValidObj;
 	},
 
@@ -186,11 +153,11 @@ const myForm = {
 			'email': getValue('email'),
 			'phone': getValue('phone'),
 		};
-		console.log(dataInputsObj);
-		return dataInputsObj;
+		return dataInputsObj; // Возвращаем объект с данными формы
 	},
 
 	setData: (data) => {
+		// Этот метод устанавливает полученные данные, как значение инпутов
 		let fioInputValue = data['fio'];
 		let emailInputValue = data['email'];
 		let phoneInputValue = data['phone'];
@@ -205,15 +172,13 @@ const myForm = {
 };
 
 
-//Блок кода,отвечающий за взаимоедйствие с глобальным объектом myForm
+//Описываем взаимодействие с глобальным объектом myForm
 let submitButton = document.querySelector('#submitButton');
 submitButton.addEventListener('click', callSubmitMethod);
 
 function callSubmitMethod(event) {
 	event.preventDefault();
 	myForm.submit();
-	myForm.getData();
-	myForm.setData({'fio':'123','email':'321','phone':'+7'})
 }
 
 
