@@ -15,63 +15,70 @@ const myForm = {
 
 
 		// Удаляем у всех инпутов класс 'error' (чистим 'старые' ошибки валидации)
-		let allInputsError = document.querySelectorAll('.error');
-		for ( inputError of allInputsError) inputError.classList.remove('error');
-
-
-		// Формируем ajax-запрос
-		function sendQuery() {
-			let xhr = new XMLHttpRequest();
-			let xhrAdress = document.querySelector('#myForm').getAttribute('action');
-			xhr.open('GET', xhrAdress);
-			xhr.send();
-			xhr.addEventListener('load', processResponse.bind(null, xhr));
+		let allInputsErrors = document.querySelectorAll('.error');
+		for (inputError of allInputsErrors) {
+			inputError.classList.remove('error');
 		}
 
-		// Для каждого ответа с сервера вызываем свой callback
-		function processResponse(xhr) {
-			if ( xhr.status === 200 ) {
-				requestResponse = JSON.parse(xhr.responseText);
 
-				switch (requestResponse.status) {
-					case "success":
-						requestResponseFunctionSuccess();
-						break;
-					case "error":
-						requestResponseFunctionError(requestResponse.reason);
-						break;
-					case "progress":
-						requestResponseFunctionProgress(requestResponse.timeout);
-						break;
-				}
+		// Формируем запрос,который будем отправлять
+		function sendQuery() {
+			let requestAdress = document.querySelector('#myForm').getAttribute('action');
+			fetch(requestAdress)
+				.then((response) => {
+					if (response.status === 200) {
+						return response.json()
+					}
+					throw new Error('Network response was not ok.')
+				})
+				.then( processResponse )
+				.catch((err) => console.error(err.message))
+		}
+
+
+
+		// Для каждого ответа с сервера вызываем свой callback
+		function processResponse(response) {
+			switch (response.status) {
+				case "success":
+					requestResponseFunctionSuccess();
+					break;
+				case "error":
+					requestResponseFunctionError(response.reason);
+					break;
+				case "progress":
+					requestResponseFunctionProgress(response.timeout);
+					break;
 			}
+		}
+
+
+		// Функция,которая сначала удаляет все классы,а затем выставляет нужный
+		function updateClassListContainer(pluginClass) {
+			containerInfoOutput.classList.remove('success', 'error', 'progress');
+			containerInfoOutput.classList.add(pluginClass);
 		}
 
 		// Определяем функции,которые будут вызываться в зависимости от того, какой придет ответ на ajax-запрос
 		function requestResponseFunctionSuccess() {
-			containerInfoOutput.classList.remove('success','error','progress');
-			containerInfoOutput.classList.add('success');
+			updateClassListContainer('success');
 			containerInfoOutput.innerText = 'Success';
 		}
 
 		function requestResponseFunctionError(reason) {
-			containerInfoOutput.classList.remove('success','error','progress');
-			containerInfoOutput.classList.add('error');
+			updateClassListContainer('error');
 			containerInfoOutput.innerText = reason;
 		}
 
 		function requestResponseFunctionProgress(timeout) {
-			containerInfoOutput.classList.remove('success','error','progress');
-			containerInfoOutput.classList.add('progress');
+			updateClassListContainer('progress');
 			setTimeout(sendQuery, timeout)
 		}
 
 
 
-
-		// Если все валидации были успешны, то отправляем запрос и делаем кнопку отправки запроса неактивной
 		// Если валидация неуспешна, то выставляем класс 'error' тем инпутам,которые не прошли валидацию
-
+		// Если все валидации были успешны, то отправляем запрос и делаем кнопку отправки запроса неактивной
 		if ( !resultValidObj.isValid ) {
 			for ( let count = 0, len = resultValidObj.errorFields.length; count < len; count++ ) {
 				let errorName = resultValidObj.errorFields[count];
@@ -81,7 +88,7 @@ const myForm = {
 			}
 		}
 		else if ( resultValidObj.isValid ) {
-			buttonSubmit.setAttribute('disabled','disabled');
+			buttonSubmit.setAttribute('disabled', 'disabled');
 			sendQuery();
 		}
 	},
@@ -94,20 +101,19 @@ const myForm = {
 		let nameFieldEmail = inputEmail.getAttribute('name');
 		let nameFieldPhone = inputPhone.getAttribute('name');
 
-		// Определяем функции для валидации каждого инпута
 
 		// Фукнция валидации первого инпута ( ФИО )
 		function checkValidFio() {
-			return inputFio.value.split(' ').length === 3
+			return (/^\s*\w+\s+\w+\s+\w+\s*$/gi.test(inputFio.value));
 		}
 
 		// Функция валидации второго инпута ( EMAIL )
 		function checkValidMail() {
 			let emailValidate = false;
-			let validDomain = ['ya.ru','yandex.ru','yandex.ua','yandex.by','yandex.kz','yandex.com'];
+			let validDomain = ['ya.ru', 'yandex.ru', 'yandex.ua', 'yandex.by', 'yandex.kz', 'yandex.com'];
 			let value = inputEmail.value;
-			let domain = value.split('@')[1];
-			if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(value)) {
+			if (/^\s*\w+([\.-]?\w+)*@{1}\w+([\.-]?\w+)*(\.\w{2,3})+\s*$/gi.test(value)) {
+				let domain = value.split('@')[1];
 				if ( validDomain.indexOf(domain) !== -1	 ) emailValidate = true;
 			}
 			return emailValidate;
@@ -118,10 +124,10 @@ const myForm = {
 		function checkValidPhone() {
 			let phoneValidate = false;
 			let value = inputPhone.value;
-			if ( value[0] === '+' && value[2] === '(' && value[6] === ')' && value[10] === '-' && value[13] === '-') {
-				let validNum = parseInt(value.replace(/\D+/g, ""));
-				let arrNumber = String(validNum).split('');
-				let sumNumber = arrNumber.reduce(function (a, b) {
+			if (/^\s*\+{1}7{1}\({1}\d{3}\){1}\d{3}\-{1}\d{2}\-{1}\d{2}\s*$/gi.test(value)) {
+				let validNum = value.replace(/\D+/g, "");
+				let arrNumber = validNum.split('');
+				let sumNumber = arrNumber.reduce((a, b) => {
 					return (+a) + (+b);
 				}, 0);
 				if ( sumNumber <= 30 ) phoneValidate = true
@@ -139,25 +145,23 @@ const myForm = {
 			if ( !checkValidMail() )  errorFields.push(nameFieldEmail);
 			if ( !checkValidPhone() ) errorFields.push(nameFieldPhone);
 		}
-		let resultValidObj = {'isValid': flagGeneralValid, 'errorFields': errorFields};
-
-		return resultValidObj;
+		return  {'isValid': flagGeneralValid, 'errorFields': errorFields};
 	},
 
 	getData: () => {
 		function getValue(name) {
 			return document.querySelector(`input[name="${name}"`).value;
 		}
-		let dataInputsObj = {
+		// Возвращаем объект с данными формы
+		return dataInputsObj = {
 			'fio': getValue('fio'),
 			'email': getValue('email'),
 			'phone': getValue('phone'),
 		};
-		return dataInputsObj; // Возвращаем объект с данными формы
 	},
 
 	setData: (data) => {
-		// Этот метод устанавливает полученные данные, как значение инпутов
+		// Этот метод устанавливает полученные данные, как значения инпутов
 		let fioInputValue = data['fio'];
 		let emailInputValue = data['email'];
 		let phoneInputValue = data['phone'];
@@ -179,7 +183,6 @@ submitButton.addEventListener('click', callSubmitMethod);
 function callSubmitMethod(event) {
 	event.preventDefault();
 	myForm.submit();
+	myForm.getData();
+	myForm.setData({'fio':53, 'email': 123, 'phone': '+7(111)222-33-11'})
 }
-
-
-
