@@ -183,6 +183,4 @@ submitButton.addEventListener('click', callSubmitMethod);
 function callSubmitMethod(event) {
 	event.preventDefault();
 	myForm.submit();
-	myForm.getData();
-	myForm.setData({'fio':53, 'email': 123, 'phone': '+7(111)222-33-11'})
 }
