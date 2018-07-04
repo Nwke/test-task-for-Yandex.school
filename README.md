@@ -1,1 +1,1 @@
-## yandexTestSchool
+## YandexTestSchool
